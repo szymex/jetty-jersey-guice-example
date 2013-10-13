@@ -10,10 +10,10 @@ In addition it uses simple filter and asynchronous requests.
 
 ## Usage
 
-`mvn exec:java -Dexec.args="pl"
+`mvn exec:java -Dexec.args="pl"`
 (for polish hello world)
 
-`mvn exec:java -Dexec.args="fi"
+`mvn exec:java -Dexec.args="fi"`
 (for finnish hello world)
 
 http://localhost:8080/hello.json
