@@ -12,13 +12,14 @@ import java.util.Map;
 import javax.inject.Singleton;
 import hello.HelloWorld;
 import hello.HelloWorldFI;
+import utils.UserProvider;
 import org.eclipse.jetty.servlet.DefaultServlet;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         Guice.createInjector(new HelloJerseyModule(args));
-
+               
         Server server = new Server(8080);
         ServletContextHandler servletHandler = new ServletContextHandler();
         servletHandler.addFilter(GuiceFilter.class, "/*", null);
@@ -50,7 +51,8 @@ public class Main {
         protected void configureServlets() {
             bind(HelloResource.class);
             bind(GsonMessageBodyHandler.class).in(Singleton.class);
-
+            bind(UserProvider.class);
+            
             filter("/*").through(HelloFilter.class);
 
             Map<String, String> params = new HashMap<>();

@@ -15,6 +15,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import hello.HelloWorld;
+import hello.CustomContext;
+import utils.User;
 
 @Path("/")
 @Singleton
@@ -34,8 +36,8 @@ public class HelloResource {
     @Path("/hello")
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("user")
-    public String getTxtMessage() {
-        return helloWord.say();
+    public String getTxtMessage(@CustomContext User user) {
+        return helloWord.say() + " " + user.name;
     }
 
     @GET
