@@ -1,13 +1,11 @@
 package utils;
 
+import hello.User;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.core.spi.component.ComponentContext;
-import com.sun.jersey.core.spi.component.ComponentScope;
 import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.InjectableProvider;
-import hello.CustomContext;
-import java.lang.reflect.Type;
+import com.sun.jersey.spi.inject.PerRequestTypeInjectableProvider;
 import javax.inject.Singleton;
 import javax.ws.rs.ext.Provider;
 
@@ -17,24 +15,20 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 @Singleton
-public class UserProvider extends AbstractHttpContextInjectable<User> implements InjectableProvider<CustomContext, Type> {  
+public class UserProvider extends PerRequestTypeInjectableProvider<CustomContext, User> {
 
-    @Override  
-    public Injectable<User> getInjectable(ComponentContext ic, CustomContext a, Type c) {  
-        if (c.equals(User.class)) {  
-            return this;  
-        }  
-        return null;  
-    }  
-  
-    @Override  
-    public ComponentScope getScope() {  
-        return ComponentScope.PerRequest;  
-    }  
-  
-    @Override  
-    public User getValue(HttpContext c) {  
-        return new User(c.getRequest().getQueryParameters().getFirst("user"));  
-    }  
-        
+    public UserProvider() {
+        super(User.class);
+    }
+
+    @Override
+    public Injectable<User> getInjectable(ComponentContext ic, CustomContext a) {
+
+        return new AbstractHttpContextInjectable<User>() {
+            @Override
+            public User getValue(HttpContext c) {
+                return new User(c.getRequest().getQueryParameters().getFirst("user"));
+            }
+        };
+    }
 }

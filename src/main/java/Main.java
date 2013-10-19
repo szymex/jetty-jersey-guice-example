@@ -1,4 +1,5 @@
 
+import utils.GsonMessageBodyHandler;
 import hello.HelloWorldPL;
 import com.google.inject.Guice;
 import com.google.inject.Provides;
@@ -59,7 +60,6 @@ public class Main {
             params.put("com.sun.jersey.spi.container.ResourceFilters", "com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory");
             params.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
             serve("/*").with(GuiceContainer.class, params);
-
         }
     }
 }
