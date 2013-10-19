@@ -1,44 +1,77 @@
 
+import utils.GsonMessageBodyHandler;
+import com.google.inject.AbstractModule;
 import hello.HelloWorldPL;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
-import com.google.inject.servlet.GuiceFilter;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import com.sun.jersey.guice.JerseyServletModule;
-import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
-import java.util.HashMap;
-import java.util.Map;
 import javax.inject.Singleton;
 import hello.HelloWorld;
 import hello.HelloWorldFI;
-import utils.UserProvider;
-import org.eclipse.jetty.servlet.DefaultServlet;
+import javax.inject.Inject;
+import utils.UserFactory;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
+import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
+import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
+import utils.User;
 
 public class Main {
 
+    static Injector INJECTOR;
+
     public static void main(String[] args) throws Exception {
-        Guice.createInjector(new HelloJerseyModule(args));
-               
+        INJECTOR = Guice.createInjector(new HelloModule(args));
+
         Server server = new Server(8080);
         ServletContextHandler servletHandler = new ServletContextHandler();
-        servletHandler.addFilter(GuiceFilter.class, "/*", null);
-        servletHandler.addServlet(DefaultServlet.class, "/");
+
+        ServletHolder sh = new ServletHolder(new ServletContainer());
+        sh.setInitParameter("javax.ws.rs.Application", HelloApplication.class.getName());
+        servletHandler.addFilter(new FilterHolder(INJECTOR.getInstance(HelloFilter.class)), "/*", null);
+        servletHandler.addServlet(sh, "/*");
 
         server.setHandler(servletHandler);
         server.start();
         server.join();
     }
 
-    private static class HelloJerseyModule extends JerseyServletModule {
+    private static class HelloApplication extends ResourceConfig {
+
+        @Inject
+        public HelloApplication(ServiceLocator serviceLocator) {
+            GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
+            GuiceIntoHK2Bridge guiceBridge = serviceLocator.getService(GuiceIntoHK2Bridge.class);
+            guiceBridge.bridgeGuiceInjector(Main.INJECTOR);
+
+            registerInstances(new AbstractBinder() {
+                @Override
+                protected void configure() {
+                    bindFactory(UserFactory.class).to(User.class);
+                }
+            });
+
+            register(GsonMessageBodyHandler.class);
+            register(HelloResource.class);
+        }
+    }
+
+    private static class HelloModule extends AbstractModule {
 
         private String[] args;
 
-        public HelloJerseyModule(String[] args) {
+        public HelloModule(String[] args) {
             this.args = args;
         }
 
         @Provides
+        @Singleton
         public HelloWorld provideHelloWorld() {
             if (args.length > 0 && args[0].equals("fi")) {
                 return new HelloWorldFI();
@@ -48,18 +81,8 @@ public class Main {
         }
 
         @Override
-        protected void configureServlets() {
-            bind(HelloResource.class);
-            bind(GsonMessageBodyHandler.class).in(Singleton.class);
-            bind(UserProvider.class);
-            
-            filter("/*").through(HelloFilter.class);
-
-            Map<String, String> params = new HashMap<>();
-            params.put("com.sun.jersey.spi.container.ResourceFilters", "com.sun.jersey.api.container.filter.RolesAllowedResourceFilterFactory");
-            params.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-            serve("/*").with(GuiceContainer.class, params);
-
+        protected void configure() {
+            bind(UserFactory.class);
         }
     }
 }

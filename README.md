@@ -1,9 +1,9 @@
-EmbeddedJetty-Jersey-Guice-Example
+EmbeddedJetty-Jersey2-Guice-Example
 ==========================
 
 Hello world example project that integrates:
 - Jetty embedded 9.x
-- Jersey 1.x
+- Jersey 2.x
 - Guice 3.0
 
 In addition it uses simple filter, custom provider and asynchronous requests.

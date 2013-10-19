@@ -3,7 +3,6 @@
 import java.io.IOException;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,15 +14,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import hello.HelloWorld;
-import hello.CustomContext;
-import utils.User;
 
 @Path("/")
-@Singleton
 public class HelloResource {
 
-    @Inject
-    HelloWorld helloWord;
+    @Inject HelloWorld helloWord;
+    //@Inject User user;
 
     @GET
     @Path("/hello.json")
@@ -36,8 +32,8 @@ public class HelloResource {
     @Path("/hello")
     @Produces(MediaType.TEXT_PLAIN)
     @RolesAllowed("user")
-    public String getTxtMessage(@CustomContext User user) {
-        return helloWord.say() + " " + user.name;
+    public String getTxtMessage() {
+        return helloWord.say(); //+ " " + user;
     }
 
     @GET
