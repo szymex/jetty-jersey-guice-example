@@ -17,6 +17,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
 import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
@@ -57,9 +58,10 @@ public class Main {
                 }
             });
 
+            register(RolesAllowedDynamicFeature.class);
             register(GsonMessageBodyHandler.class);
-            register(HelloResource.class);
-        }
+            register(HelloResource.class);                        
+        }                 
     }
 
     private static class HelloModule extends AbstractModule {
